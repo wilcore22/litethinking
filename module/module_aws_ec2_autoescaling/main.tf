@@ -26,10 +26,10 @@ resource "aws_autoscaling_group" "this" {
   health_check_grace_period = 300
   health_check_type         = var.asg_health_check_type
   
-  # 🔄 CORREGIDO: Usamos la lista de IDs reales de subredes
+  
   vpc_zone_identifier       = var.subnet_ids
   
-  # Target Groups donde el ASG va a registrar las instancias dinámicamente
+  
   target_group_arns         = var.target_group_arns
 
   enabled_metrics = [

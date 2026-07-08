@@ -17,7 +17,7 @@ resource "aws_lb_target_group" "this" {
   port        = var.lb_target_port
   protocol    = var.lb_protocol    
   target_type = var.lb_target_type  
-  vpc_id      = var.vpc_id # ✅ Esto está perfecto (recibe el ID real)
+  vpc_id      = var.vpc_id
   
   tags        = merge({ "Name" = "tg-${var.name_lb}" }, var.tags)
 }
@@ -37,7 +37,7 @@ resource "aws_lb_target_group_attachment" "this" {
   count            = length(var.target_instance_ids)
   target_group_arn = aws_lb_target_group.this.arn
   
-  # 🔄 CORREGIDO: Usamos la lista de IDs de instancias pasadas por variable directa
+  
   target_id        = var.target_instance_ids[count.index]
   port             = var.lb_target_port
 }
