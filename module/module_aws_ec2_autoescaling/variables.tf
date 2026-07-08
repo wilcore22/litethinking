@@ -1,45 +1,55 @@
-variable "name" {}
-
-variable "tags" {
-  description = "Tag map for the resource"
-  type        = map(string)
-  default     = {}
+variable "name" {
+  type = string
 }
 
+variable "image_id" {
+  type = string
+}
 
+variable "instance_type" {
+  type    = string
+  default = "t2.micro"
+}
 
-
-variable "image_id" {}
-variable "instance_type" {}
-variable "key_name" {}
+variable "key_name" {
+  type    = string
+  default = null
+}
 
 variable "security_group_ids" {
-  description = "List of Security Group IDs to associate with the EC2 instance"
-  type        = list(string)
+  type = list(string)
 }
 
-variable "azs" {
- type        = list(string)
- description = "Availability Zones"
- default     = []
+variable "subnet_ids" {
+  type = list(string)
 }
 
-variable "public_subnet_cidrs" {
- type        = list(string)
- description = "Public Subnet CIDR values"
- default     = []
+variable "target_group_arns" {
+  type    = list(string)
+  default = []
 }
 
-
-# Auto Scaling
-variable "max_size" {}
-variable "min_size" {}
-variable "desired_capacity" {}
-variable "asg_health_check_type" {}
-variable "target_group_arns" {}
-
-variable "aws_lb" {
-  description = "List of Security Group IDs to associate with the EC2 instance"
-  type        = list(string)
+variable "max_size" {
+  type    = number
+  default = 3
 }
 
+variable "min_size" {
+  type    = number
+  default = 1
+}
+
+variable "desired_capacity" {
+  type    = number
+  default = 1
+}
+
+variable "asg_health_check_type" {
+  type    = string
+  default = "ELB"
+}
+
+variable "tags" {
+  type    = map(string)
+  default = {}
+}

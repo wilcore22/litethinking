@@ -85,47 +85,50 @@ module "aws_route_subnet_public" {
 
  #### create ec2 ######
 
- module "ec2_new" {
-   source = "./module/module_aws_ec2"
-   ami               = var.ami
-   azs = var.azs
-   subnet_ids          = module.aws_subnet_public.subnet_ids
-   security_group_ids   = [module.aws_security_group.security_group_id]
-   user_data_filepath       = var.user_data_filepath
- }
+#  module "ec2_new" {
+#    source = "./module/module_aws_ec2"
+#    ami               = var.ami
+#    azs = var.azs
+#    subnet_ids          = module.aws_subnet_public.subnet_ids
+#    security_group_ids   = [module.aws_security_group.security_group_id]
+#    user_data_filepath       = var.user_data_filepath
+#  }
 
 
 #  ### create lb aws ###
 
-#  module "aws_lb" {
-#    source = "./module/module_aws_lb"
-#    public_subnet_cidrs      = var.public_subnet_cidrs
-#    security_group_ids   = [module.aws_security_group.security_group_id]
-#    name_lb               = var.name_lb
-#    lb_target_tags_map    = var.lb_target_tags_map
-#    vpc_id = module.aws_vpc.aws_vpc_id
-#  }
+module "aws_alb" {
+  source = "./module/module_aws_lb"
+  name_lb             = "alb-litethinking"
+  vpc_id              = module.aws_vpc.vpc_id
+  subnet_ids          = module.aws_subnet_public.subnet_ids
+  security_group_ids  = [module.aws_security_group.security_group_id]
+}
 
 
 
 
 #  ### create autoescaling aws ###
 
-#  module "aws_ec2_autoescaling" {
-#    source = "./module/module_aws_ec2_autoescaling"
-#    public_subnet_cidrs      = var.public_subnet_cidrs
-#    security_group_ids   = [module.aws_security_group.security_group_id]
-#    name               = var.name
-#    image_id = var.image_id
-#    instance_type = var.instance_type
-#    key_name = var.key_name
-#    max_size = var.max_size
-#    min_size = var.min_size
-#    desired_capacity = var.desired_capacity
-#    asg_health_check_type = var.asg_health_check_type
-#    target_group_arns = var.target_group_arns
-#    aws_lb = [module.aws_lb.lb_tg_arn]
-#  }
+module "aws_asg" {
+  source = "./module/module_aws_ec2_autoescaling"
+
+  name               = "asg-litethinking"
+  image_id           = var.ami
+  instance_type      = "t2.micro"
+  key_name           = var.key_name
+  security_group_ids = [module.aws_security_group.security_group_id]
+  
+  
+  subnet_ids         = module.aws_subnet_public.subnet_ids
+  
+  
+  target_group_arns  = [module.aws_alb.target_group_arn]
+
+  min_size           = 1
+  max_size           = 3
+  desired_capacity   = 2
+}
 
 
  #### create db #####
