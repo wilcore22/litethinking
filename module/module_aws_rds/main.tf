@@ -1,52 +1,37 @@
+# 1. Agrupamos tus subredes de Intranet para la Base de Datos
+resource "aws_db_subnet_group" "this" {
+  name       = "rds-intranet-subnet-group"
+  subnet_ids = var.intranet_subnet_ids
+
+  tags = {
+    Name = "rds-intranet-subnet-group"
+  }
+}
+
+# 2. Tu instancia RDS económica
 resource "aws_db_instance" "db" {
-  allocated_storage = 500
-  storage_type = "gp2"
-  engine = "mysql"
-  engine_version = "5.7"
-  instance_class = "db.t3.medium"
-  identifier = "mydb"
-  username = "dbpragma"
-  password = "Pr4Gm42024*"
+  allocated_storage      = 20
+  max_allocated_storage  = 20
+  storage_type           = "gp2"
+  engine                 = "mysql"
+  engine_version         = "8.0"
+  instance_class         = "db.t3.micro"
+  
+  identifier             = "mydb"
+  db_name                = "appdb"
+  username               = "dbpragma"
+  password               = "Pr4Gm42024*"
 
   vpc_security_group_ids = var.security_group_ids
-  db_subnet_group_name = var.private_group_name
+  
+  # 🔗 Conectamos el grupo de subredes que acabamos de crear arriba
+  db_subnet_group_name   = aws_db_subnet_group.this.name
 
-  backup_retention_period = 7
-  backup_window = "03:00-04:00"
-  maintenance_window = "mon:04:00-mon:04:30"
+  backup_retention_period = 0
+  skip_final_snapshot     = true
 
-  skip_final_snapshot = false
-  final_snapshot_identifier = "my-db"
+  monitoring_interval          = 0
+  performance_insights_enabled = false
 
-  # Enable enhanced monitoring
-  monitoring_interval = 60 # Interval in seconds (minimum 60 seconds)
-  monitoring_role_arn = aws_iam_role.rds_monitoring_role.arn
-
-  # Enable performance insights
-  performance_insights_enabled = true
-
-}
-
-
-resource "aws_iam_role" "rds_monitoring_role" {
-  name = "rds-monitoring-role"
-
-  assume_role_policy = jsonencode({
-  Version = "2012-10-17",
-  Statement = [
-      {
-        Action = "sts:AssumeRole",
-        Effect = "Allow",
-        Principal = {
-        Service = "monitoring.rds.amazonaws.com"
-      }
-    }
-  ]
-})
-}
-
-resource "aws_iam_policy_attachment" "rds_monitoring_attachment" {
-  name = "rds-monitoring-attachment"
-  roles = [aws_iam_role.rds_monitoring_role.name]
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole"
+  publicly_accessible = false
 }

@@ -1,10 +1,9 @@
-variable "private_group_name" {
-  type        = string
-  default     = ""
+variable "intranet_subnet_ids" {
+  type        = list(string)
+  description = "Lista de IDs reales de las subredes de intranet para RDS"
 }
 
 variable "security_group_ids" {
-  description = "List of Security Group IDs to associate with the EC2 instance"
   type        = list(string)
-  default     = []
+  description = "Security group para acceso a MySQL (puerto 3306)"
 }

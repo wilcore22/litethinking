@@ -35,39 +35,38 @@ module "aws_route_subnet_public" {
 
 # ### create subnet private ####
 
-# module "aws_subnet_private" {
-#   source = "./module/module_aws_subnet_private"
-#   name_vpc                 = var.name_vpc
-#   private_subnet_cidrs      = var.private_subnet_cidrs
-#   azs                      = var.azs
+ module "aws_subnet_private" {
+   source = "./module/module_aws_subnet_private"
+   vpc_id              = module.aws_vpc.vpc_id
+   private_subnet_cidrs      = var.private_subnet_cidrs
+   azs                      = var.azs
 
-
-# }
+}
 
 
 # ### create subnet intranet ####
 
-# module "aws_subnet_intranet" {
-#   source = "./module/module_aws_subnet_private"
-#   name_vpc                 = var.name_vpc
-#   private_subnet_cidrs      = var.intranet_subnet_cidrs
-#   azs                      = var.azs
+ module "aws_subnet_intranet" {
+   source = "./module/module_aws_subnet_private"
+   vpc_id              = module.aws_vpc.vpc_id
+   private_subnet_cidrs      = var.intranet_subnet_cidrs
+   azs                      = var.azs
 
 
-# }
+ }
 
 
 # ### create nat gateway ####
 
-# module "aws_nat_gateway" {
-#   source = "./module/module_aws_nat_gateway"
+ module "aws_nat_gateway" {
+   source = "./module/module_aws_nat_gateway"
 
-#   name_vpc                 = var.name_vpc
-#   private_subnet_cidrs      = var.private_subnet_cidrs
-#   public_subnet_cidrs      = var.public_subnet_cidrs
-#   name                 = var.name
+  vpc_id              = module.aws_vpc.vpc_id
+  public_subnet_ids   = module.aws_subnet_public.subnet_ids
+  private_subnet_ids  = module.aws_subnet_private.subnet_ids
+  intranet_subnet_ids = module.aws_subnet_intranet.subnet_ids
 
-# }
+ }
 
 
  #### create security group ######
@@ -85,14 +84,14 @@ module "aws_route_subnet_public" {
 
  #### create ec2 ######
 
-#  module "ec2_new" {
-#    source = "./module/module_aws_ec2"
-#    ami               = var.ami
-#    azs = var.azs
-#    subnet_ids          = module.aws_subnet_public.subnet_ids
-#    security_group_ids   = [module.aws_security_group.security_group_id]
-#    user_data_filepath       = var.user_data_filepath
-#  }
+  module "ec2_new" {
+    source = "./module/module_aws_ec2"
+    ami               = var.ami
+    azs = var.azs
+    subnet_ids          = module.aws_subnet_public.subnet_ids
+    security_group_ids   = [module.aws_security_group.security_group_id]
+    user_data_filepath       = var.user_data_filepath
+  }
 
 
 #  ### create lb aws ###
@@ -120,7 +119,7 @@ module "aws_asg" {
   security_group_ids = [module.aws_security_group.security_group_id]
   
   
-  subnet_ids         = module.aws_subnet_public.subnet_ids
+  subnet_ids         = module.aws_subnet_private.subnet_ids
   
   
   target_group_arns  = [module.aws_alb.target_group_arn]
@@ -133,12 +132,30 @@ module "aws_asg" {
 
  #### create db #####
 
-  # module "aws_rds" {
-  #   source = "./module/module_aws_rds"
-  #   private_group_name      = var.private_group_name
-  #   security_group_ids   = [module.aws_security_group_rds.security_group_id]
+module "aws_security_group_db" {
+  source = "./module/module_aws_security_group"
 
-  # }
+  name_sg       = "sg-rds-mysql"
+  vpc_id        = module.aws_vpc.vpc_id
+  ingress_rules = [
+    {
+      from_port   = 3306
+      to_port     = 3306
+      protocol    = "tcp"
+      cidr_block  = var.cidr
+      description = "Acceso MySQL desde VPC"
+    }
+  ]
+  egress_rules  = [
+    {
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_block  = "0.0.0.0/0"
+      description = "Salida general"
+    }
+  ]
+}
 
 
 

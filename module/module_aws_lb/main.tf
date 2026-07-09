@@ -4,7 +4,7 @@ resource "aws_lb" "this" {
   load_balancer_type = var.load_balancer_type
   security_groups    = var.security_group_ids
   
-  # 🔄 CORREGIDO: Usamos la lista de IDs de subredes reales
+  
   subnets            = var.subnet_ids
 
   enable_deletion_protection = var.enable_deletion_protection

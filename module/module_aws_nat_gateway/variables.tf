@@ -1,37 +1,35 @@
-variable "connectivity_type" {
-  description = "connectivity_type"
+variable "name" {
+  type    = string
+  default = "litethinking"
+}
+
+variable "vpc_id" {
   type        = string
-  default     = "public" # "private"
+  description = "ID real de la VPC"
 }
 
-variable "public_subnet_cidrs" {
- type        = list(string)
- description = "Public Subnet CIDR values"
- default     = []
+variable "public_subnet_ids" {
+  type        = list(string)
+  description = "Lista de IDs reales de subredes públicas (donde se aloja el NAT)"
 }
 
-variable "name_vpc" {}
-
-variable "private_subnet_cidrs" {
- type        = list(string)
- description = "Private Subnet CIDR values"
- default     = []
+variable "private_subnet_ids" {
+  type        = list(string)
+  description = "Lista de IDs reales de subredes privadas"
 }
 
-variable "intranet_subnet_cidrs" {
- type        = list(string)
- description = "Intranet Subnet CIDR values"
- default     = []
+variable "intranet_subnet_ids" {
+  type        = list(string)
+  default     = []
+  description = "Lista de IDs reales de subredes aisladas (ej. bases de datos)"
+}
+
+variable "connectivity_type" {
+  type    = string
+  default = "public"
 }
 
 variable "tags" {
-  description = "Tag map for the resource"
-  type        = map(string)
-  default     = {}
-}
-
-variable "name" {
-  description = "Name to be used on all the resources as identifier"
-  type        = string
-  default     = ""
+  type    = map(string)
+  default = {}
 }
